@@ -5,13 +5,13 @@ import java.util.List;
 
 public class Restaurant {
 
-    private static int idCounter;
     private static final List<Restaurant> restaurantList = new ArrayList<>();
-    private String name;
+    private static int idCounter;
     private final String address;
     private final RestaurantType type;
     private final int id;
     private final List<Meal> mealsList = new ArrayList<>();
+    private String name;
 
     public Restaurant(String name, String address, RestaurantType type) {
         this.id = idCounter++;
@@ -21,11 +21,18 @@ public class Restaurant {
         restaurantList.add(this);
     }
 
+
     public static List<Restaurant> getRestaurantList() {
         return restaurantList;
     }
 
+    public static void printingRestaurantListMethod() {
+        System.out.println("list of restaurants:");
+        for (Restaurant restaurant : restaurantList) {
+            System.out.println(restaurant);
+        }
 
+    }
 
 
     public void addMeal(Meal meal) {

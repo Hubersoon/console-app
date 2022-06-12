@@ -59,7 +59,7 @@ public class CreateRestaurant {
             System.out.println("Type restaurant id to add the meal, or type \"all\" to see all restaurant");
             addInfo = scan.nextLine();
             if ("all".equals(addInfo)) {
-                System.out.println(Restaurant.getRestaurantList());
+                Restaurant.printingRestaurantListMethod();
             }
         }
         while ("all".equals(addInfo));
@@ -98,7 +98,7 @@ public class CreateRestaurant {
                 break;
             }
             case 3: {
-                System.out.println(Restaurant.getRestaurantList());
+                Restaurant.printingRestaurantListMethod();
                 System.out.println("type the id you want to see");
                 int chosenId = scan.nextInt();
                 for (int i = 0; i < Restaurant.getRestaurantList().size(); i++) {
@@ -127,7 +127,7 @@ public class CreateRestaurant {
             System.out.println("Type restaurant id you want to change, or type \"all\" to see all restaurant");
             info = scan.nextLine();
             if ("all".equals(info)) {
-                System.out.println(Restaurant.getRestaurantList());
+                Restaurant.printingRestaurantListMethod();
             }
         }
         while ("all".equals(info));
