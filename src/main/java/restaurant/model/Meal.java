@@ -1,4 +1,4 @@
-package restaurant;
+package restaurant.model;
 
 import java.math.BigDecimal;
 
@@ -15,11 +15,15 @@ public class Meal {
         this.price = price;
     }
 
+    public int getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
-        return "Meal ID: " + id +
+        return "Meal id: " + id +
                 ", name: " + name +
-                ", price: " + price + "  "
+                ", price: " + price
                 ;
     }
 }
