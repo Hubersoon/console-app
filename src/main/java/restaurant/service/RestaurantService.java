@@ -40,23 +40,25 @@ public class RestaurantService {
             int userChoice = scan.nextInt();
 
             switch (userChoice) {
-                case 1 -> {
+                case 1: {
                     createRestaurant();
                     break;
                 }
-                case 2 -> {
+                case 2: {
 
                     addMealMethod();
                     break;
                 }
-                case 3 -> {
+
+                case 3: {
                     for (Restaurant restaurant : restaurantRepository.restaurantList) {
                         System.out.println("id: " + restaurant.getId() + ", restaurant " + restaurant.getName() + " " + restaurant.getMealsList());
 
                     }
                     break;
                 }
-                case 4 -> {
+
+                case 4: {
                     printRestaurants();
                     System.out.println("type the id you want to see");
                     int chosenId = scan.nextInt();
@@ -67,20 +69,23 @@ public class RestaurantService {
                     }
                     break;
                 }
-                case 5 -> {
+
+                case 5: {
                     deleteMeal();
                     break;
 
                 }
-                case 6 -> {
+
+                case 6: {
                     changeRestaurantName();
                     break;
                 }
-                case 7 -> {
+
+                case 7:{
                     deleteRestaurant();
                     break;
                 }
-                case 8 -> {
+                case 8: {
                     System.out.println("exiting");
                     System.exit(0);
                     break;
