@@ -27,15 +27,17 @@ public class RestaurantService {
 
         Scanner scan = new Scanner(System.in);
         while (true) {
-            System.out.println("type: " +
-                    "\n\"1\" for add new restaurant,  " +
-                    "\n\"2\" for add next meal, " +
-                    "\n\"3\" for show all meals of all restaurants" +
-                    "\n\"4\" for show all meals for specific restaurant, " +
-                    "\n\"5\" for delete meal for specific restaurants" +
-                    "\n\"6\" for change restaurant name" +
-                    "\n\"7\" for delete restaurant" +
-                    "\n\"8\" for exit, ");
+            System.out.println("""
+                    type:\s
+                    "1" for add new restaurant, \s
+                    "2" for add next meal,\s
+                    "3" for show all restaurant,\s
+                    "4" for show all meals of all restaurants
+                    "5" for show all meals for specific restaurant,\s
+                    "6" for delete meal for specific restaurants
+                    "7" for change restaurant name
+                    "8" for delete restaurant
+                    "9" for exit\s""");
 
             int userChoice = scan.nextInt();
 
@@ -50,42 +52,42 @@ public class RestaurantService {
                     break;
                 }
 
-                case 3: {
-                    for (Restaurant restaurant : restaurantRepository.restaurantList) {
-                        System.out.println("id: " + restaurant.getId() + ", restaurant " + restaurant.getName() + " " + restaurant.getMealsList());
-
-                    }
+                case 3:{
+                    printRestaurants();
                     break;
                 }
 
                 case 4: {
-                    printRestaurants();
-                    System.out.println("type the id you want to see");
-                    int chosenId = scan.nextInt();
-                    for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-                        if (chosenId == restaurantRepository.restaurantList.get(i).getId()) {
-                            System.out.println(restaurantRepository.restaurantList.get(i).getMealsList());
-                        }
+                    for (Restaurant restaurant : restaurantRepository.restaurantList) {
+                        System.out.println("id: " + restaurant.getId()
+                                + ", restaurant "
+                                + restaurant.getName()
+                                + " " + restaurant.getMealsList());
                     }
                     break;
                 }
 
                 case 5: {
+                  printMealsForSpecificRestaurant();
+                    break;
+                }
+
+                case 6: {
                     deleteMeal();
                     break;
 
                 }
 
-                case 6: {
+                case 7: {
                     changeRestaurantName();
                     break;
                 }
 
-                case 7:{
+                case 8: {
                     deleteRestaurant();
                     break;
                 }
-                case 8: {
+                case 9: {
                     System.out.println("exiting");
                     System.exit(0);
                     break;
@@ -122,7 +124,7 @@ public class RestaurantService {
         RestaurantType restaurantType = restaurantTypeChecker(inputType);
         Restaurant newRestaurant = new Restaurant(name, address, restaurantType);
         restaurantRepository.restaurantList.add(newRestaurant);
-        System.out.println("Restaurant added: \"" + newRestaurant.getName() +"\"" + ", id: " + newRestaurant.getId());
+        System.out.println("Restaurant added: \"" + newRestaurant.getName() + "\"" + ", id: " + newRestaurant.getId());
 
     }
 
@@ -133,7 +135,7 @@ public class RestaurantService {
         System.out.println("Type meal price");
         BigDecimal mealPrice = scan.nextBigDecimal();
         scan.nextLine();
-        String addInfo = "";
+        String addInfo;
         do {
             System.out.println("Type restaurant id to add the meal, or type \"all\" to see all restaurant");
             addInfo = scan.nextLine();
@@ -153,6 +155,19 @@ public class RestaurantService {
             }
         }
 
+    }
+
+    private void printMealsForSpecificRestaurant() {
+        Scanner scanner = new Scanner(System.in);
+        printRestaurants();
+        System.out.println("type the id you want to see");
+        int chosenId = scanner.nextInt();
+        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
+            if (chosenId == restaurantRepository.restaurantList.get(i).getId()) {
+                System.out.println("Restaurant: \"" + restaurantRepository.restaurantList.get(i).getName() + "\" "
+                        + restaurantRepository.restaurantList.get(i).getMealsList());
+            }
+        }
     }
 
     private void deleteMeal() {
@@ -178,19 +193,20 @@ public class RestaurantService {
                     " or \"all\" to see all meals in chosen restaurant," +
                     " \"back\" to change chosen restaurant");
             infoMeal = scanner.nextLine();
-            if ("all".equals(infoMeal)){
+            if ("all".equals(infoMeal)) {
                 System.out.println("Restaurant " + restaurantRepository.restaurantList.get(chosenIdRestaurant).getName() +
                         " " + restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList());
-            } else if ("back".equals(infoMeal)) { deleteMeal();}
+            } else if ("back".equals(infoMeal)) {
+                deleteMeal();
+            }
         }
-        while("all".equals(infoMeal));
+        while ("all".equals(infoMeal));
         int chosenIdMeal = Integer.parseInt(infoMeal);
 
         for (int i = 0; i < restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList().size(); i++) {
 
-            if (chosenIdMeal == restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList().get(i).getId())
-            {
-               restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList().remove(i);
+            if (chosenIdMeal == restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList().get(i).getId()) {
+                restaurantRepository.restaurantList.get(chosenIdRestaurant).getMealsList().remove(i);
                 System.out.println("meal removed");
             }
 
@@ -198,41 +214,6 @@ public class RestaurantService {
 
 
     }
-
-    private void deleteRestaurant() {
-        Scanner scanner = new Scanner(System.in);
-        String userChoice = "";
-        String confirmChoice = "";
-        do {
-            System.out.println("type restaurant id you want to delete, or \"all\" to see all restaurant");
-            userChoice = scanner.nextLine();
-            if ("all".equals(userChoice)) {
-                printRestaurants();
-            }
-        } while ("all".equals(userChoice));
-
-        int chosenId = Integer.parseInt(userChoice);
-        Restaurant chosenRestaurant = null;
-        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-            if (chosenId == restaurantRepository.restaurantList.get(i).getId()){
-               chosenRestaurant = restaurantRepository.restaurantList.get(i);
-            }
-
-        }
-
-        System.out.println("You chose restaurant \"" + chosenRestaurant.getName() +"\"" +
-                "\nIf you sure to delete restaurant type \"yes\"");
-        confirmChoice = scanner.nextLine();
-        if ("yes".equals(confirmChoice)) {
-            for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-                if (chosenId == restaurantRepository.restaurantList.get(i).getId())
-                    restaurantRepository.restaurantList.remove(i);
-                System.out.println("restaurant removed");
-            }
-        }
-
-    }
-
 
     private void changeRestaurantName() {
         Scanner scanner = new Scanner(System.in);
@@ -259,6 +240,40 @@ public class RestaurantService {
 
     }
 
+    private void deleteRestaurant() {
+        Scanner scanner = new Scanner(System.in);
+        String userChoice = "";
+        String confirmChoice = "";
+        do {
+            System.out.println("type restaurant id you want to delete, or \"all\" to see all restaurant");
+            userChoice = scanner.nextLine();
+            if ("all".equals(userChoice)) {
+                printRestaurants();
+            }
+        } while ("all".equals(userChoice));
+
+        int chosenId = Integer.parseInt(userChoice);
+        Restaurant chosenRestaurant = null;
+        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
+            if (chosenId == restaurantRepository.restaurantList.get(i).getId()) {
+                chosenRestaurant = restaurantRepository.restaurantList.get(i);
+            }
+
+        }
+
+        System.out.println("You chose restaurant \"" + chosenRestaurant.getName() + "\"" +
+                "\nIf you sure to delete restaurant type \"yes\"");
+        confirmChoice = scanner.nextLine();
+        if ("yes".equals(confirmChoice)) {
+            for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
+                if (chosenId == restaurantRepository.restaurantList.get(i).getId())
+                    restaurantRepository.restaurantList.remove(i);
+                System.out.println("restaurant removed");
+            }
+        }
+
+    }
+
     private RestaurantType restaurantTypeChecker(String inputType) {
 
         return switch (inputType.toUpperCase()) {
@@ -270,4 +285,5 @@ public class RestaurantService {
             default -> null;
         };
     }
+
 }
