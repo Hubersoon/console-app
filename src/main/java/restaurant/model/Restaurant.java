@@ -6,19 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Builder
+//@Builder
 public class Restaurant {
 
-
-//    private static int idCounter;
+    public final String name;
     public final String address;
     public final RestaurantType type;
     public final UUID id;
     public final List<Meal> mealsList;
-    public final String name;
 
     public Restaurant(String name, String address, RestaurantType type) {
-//        this.id = idCounter++;
         this.name = name;
         this.address = address;
         this.type = type;
@@ -31,18 +28,30 @@ public class Restaurant {
 
     }
 
-    public Restaurant updateName(String name) {
-        return Restaurant.builder()
-                .name(name)
-                .id(id)
-                .address(address)
-                .type(type)
-                .mealsList(mealsList)
-                .build();
-    }
+//    UPDATES METHODS
+//    public Restaurant updateName(String name) {
+//        return Restaurant.builder()
+//                .name(name)
+//                .address(address)
+//                .type(type)
+//                .id(id)
+//                .mealsList(mealsList)
+//                .build();
+//    }
+
+//    public Restaurant updateMealsList(List<Meal> restaurantMeals) {
+//        return Restaurant.builder()
+//                .name(name)
+//                .address(address)
+//                .type(type)
+//                .id(id)
+//                .mealsList(restaurantMeals)
+//                .build();
+//    }
+
 
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     public List<Meal> getMealsList() {
@@ -78,7 +87,6 @@ public class Restaurant {
 
         return getId().equals(that.getId());
     }
-
     @Override
     public int hashCode() {
         return getId().hashCode();

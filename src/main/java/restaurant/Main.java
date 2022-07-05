@@ -21,8 +21,8 @@ public class Main {
         final var restaurant2 = new Restaurant("Milano Pizza", "Sobczyka 12/3, Warszawa 00-001", RestaurantType.ITALIAN);
         final var restaurant3 = new Restaurant("Meat Burger", "Lipowa 23, Gdańsk 29-545", RestaurantType.AMERICAN);
 
-        restaurant1.addMeal(new Meal("pizza", BigDecimal.valueOf(12.54)));
-        restaurant1.addMeal(new Meal("burger", BigDecimal.valueOf(24.45)));
+        restaurant1.addMeal(new Meal("Burger",BigDecimal.valueOf(255)));
+
 
         final var restaurantRepository = new RestaurantRepository(new ArrayList<>(List.of(restaurant1, restaurant2, restaurant3)));
         final var restaurantService = new RestaurantService(restaurantRepository);

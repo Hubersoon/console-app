@@ -1,6 +1,7 @@
 package restaurant.service;
 
 import restaurant.exceptions.NotFoundRestaurantException;
+import restaurant.exceptions.UnknownNumberException;
 import restaurant.model.Meal;
 import restaurant.model.Restaurant;
 import restaurant.model.RestaurantType;
@@ -8,6 +9,7 @@ import restaurant.repository.RestaurantRepository;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RestaurantService {
@@ -16,8 +18,10 @@ public class RestaurantService {
 //    6. ++refactoring + zmienic for na streams (DELETE MEAL AND DELETE RESTAURANT{atomic reference?} !!)
 //    7. poczytać o unit testach.
 //    8. poczytać o wyjątkach.
-//    9. +++wprowadzić wyjątki do aplikacji
-//    10. +++zamienic id na UUID;
+
+
+// Problem z builderem w Restaurant. (Update name)
+// Konieczne dodanie update MealList po usunięciu posiłku z konkretnej restauracji.
 
     private final RestaurantRepository restaurantRepository;
     private final Scanner scanner = new Scanner(System.in);
@@ -41,9 +45,8 @@ public class RestaurantService {
                     "9" for exit""");
             int a;
             try {
-                final var userChoice = Integer.parseInt(scanner.nextLine());
-                a = userChoice;
-            } catch (Exception e) {
+                a = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
                 System.out.println("invalid parameter, try again. " + e.getMessage());
                 continue;
             }
@@ -78,9 +81,9 @@ public class RestaurantService {
                 }
                 default -> {
                     try {
-                        throw new Exception("unknown number:");
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage() + " try again");
+                        throw new UnknownNumberException();
+                    } catch (UnknownNumberException e) {
+                        System.out.println("try again");
                     }
                 }
             }
@@ -139,7 +142,7 @@ public class RestaurantService {
         BigDecimal mealPrice;
         try {
             mealPrice = scanner.nextBigDecimal();
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             System.out.println("invalid parameter, expected number: " + e.getMessage());
             return;
         }
@@ -147,28 +150,15 @@ public class RestaurantService {
         printRestaurants();
         System.out.println("type restaurant ID you want to add meal");
         final var addInfo = scanner.nextLine();
-//        do {
-//            System.out.println("Type restaurant id to add the meal, or type \"all\" to see all restaurant");
-//            addInfo = scanner.nextLine();
-//            if ("all".equals(addInfo)) {
-//                printRestaurants();
-//            }
-//        }
-//        while ("all".equals(addInfo));
+        final var restaurantId = UUID.fromString(addInfo);
 
-//        final var idRestaurant = Integer.parseInt(addInfo);
-
-//       for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-//            Restaurant restaurant = restaurantRepository.restaurantList.get(i);
-//            if (idRestaurant == restaurant.getId()) {
-//                restaurant.addMeal(new Meal(mealName, mealPrice));
-//                System.out.println("meal added");
-//            }
-//        }
         restaurantRepository.restaurantList
                 .stream()
-                .filter(restaurant -> restaurant.getId().equals(addInfo))
-                .forEach(restaurant -> restaurant.addMeal(new Meal(mealName, mealPrice)));
+                .filter(restaurant -> (restaurant.getId()).compareTo(restaurantId) == 0)
+                .forEach(restaurant -> {
+                    restaurant.addMeal(new Meal(mealName, mealPrice));
+                    System.out.println("Meal added");
+                });
     }
 
     private void printMealsForSpecificRestaurant() {
@@ -179,15 +169,10 @@ public class RestaurantService {
     }
 
     private void printMeals(String restaurantId) {
-//        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-//            if (restaurantId == restaurantRepository.restaurantList.get(i).getId()) {
-//                System.out.println("Restaurant: \"" + restaurantRepository.restaurantList.get(i).getName() + "\" "
-//                        + restaurantRepository.restaurantList.get(i).getMealsList());
-//            }
-//        }
+        final var restaurantUUID = UUID.fromString(restaurantId);
         restaurantRepository.restaurantList
                 .stream()
-                .filter(restaurant -> restaurant.getId().equals(restaurantId))
+                .filter(restaurant -> restaurant.getId().compareTo(restaurantUUID) == 0)
                 .forEach(Restaurant::printMealList);
     }
 
@@ -195,36 +180,33 @@ public class RestaurantService {
         printRestaurants();
         System.out.println("type the id of the restaurant you want to change");
         final var restaurantId = scanner.nextLine();
-        Restaurant restaurant = null;
-        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-            if (restaurantRepository.restaurantList.get(i).getId().equals(restaurantId)) {
-                restaurant = restaurantRepository.restaurantList.get(i);
-            }
-        }
-        if (restaurant == null) return;
         printMeals(restaurantId);
         System.out.println("type the id of the meal you want to remove");
         final var mealId = scanner.nextLine();
-//        final var mealsList = restaurant.getMealsList();
-//        for (int i = 0; i < mealsList.size(); i++) {
-//            if (mealId.equals(mealsList.get(i).getID())) {
-//                mealsList.remove(i);
-//                System.out.println("meal removed");
-//            }
-//        }
-        final var restaurantMeals = restaurantRepository.restaurantList
-                .stream()
-                .filter(restaurant1 -> restaurant1.getId().equals(restaurantId))
-                .flatMap(restaurant1 -> restaurant1.getMealsList().stream())
-                .collect(Collectors.toList());
+        final var restaurantUUID = UUID.fromString(restaurantId);
+        final var mealUUID = UUID.fromString(mealId);
 
-        final var meal1 = restaurantMeals
+        final var restaurant = restaurantRepository.restaurantList
                 .stream()
-                .filter(meal -> meal.getID().equals(mealId))
+                .filter(restaurant1 -> restaurant1.getId().compareTo(restaurantUUID) == 0)
                 .findAny()
                 .orElseThrow();
 
-        restaurantMeals.remove(meal1);
+        final var restaurantMeals = restaurantRepository.restaurantList
+                .stream()
+                .filter(restaurant1 -> restaurant1.getId().compareTo(restaurantUUID) == 0)
+                .flatMap(restaurant1 -> restaurant1.getMealsList().stream())
+                .collect(Collectors.toList());
+
+        final var meal = restaurantMeals
+                .stream()
+                .filter(m -> m.getId().compareTo(mealUUID) == 0)
+                .findAny()
+                .orElseThrow();
+
+
+        restaurantMeals.remove(meal);
+//        restaurant.updateMealsList(restaurantMeals);
         System.out.println("Meal removed");
 
     }
@@ -242,49 +224,30 @@ public class RestaurantService {
 //                System.out.println("name changed");
 //            }
 //        }
-
-        final var something = restaurantRepository.restaurantList
-                .stream()
-                .filter(restaurant -> restaurant.getId().equals(info))
-                .map(restaurant -> restaurant.updateName(newName))
-                .findFirst()
-                .orElseThrow();
-
-        restaurantRepository.restaurantList.remove(something);
-        restaurantRepository.restaurantList.add(something);
+//
+//        final var something = restaurantRepository.restaurantList
+//                .stream()
+//                .filter(restaurant -> restaurant.getId().equals(info))
+//                .map(restaurant -> restaurant.updateName(newName))
+//                .findFirst()
+//                .orElseThrow();
+//
+//        restaurantRepository.restaurantList.remove(something);
+//        restaurantRepository.restaurantList.add(something);
     }
 
     private void deleteRestaurant() {
         printRestaurants();
         System.out.println("type restaurant id you want to delete");
         final var restaurantId = scanner.nextLine();
-//        int chosenId = Integer.parseInt(restaurantId);
-//        AtomicReference<Restaurant> chosenRestaurant = null;
-//        for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-//            if (restaurantId.equals(restaurantRepository.restaurantList.get(i).getID())) {
-//                chosenRestaurant.set(restaurantRepository.restaurantList.get(i));
-//            }
-//        }
-//        ??? ATOMIC REFERENCE ???
-//        restaurantRepository.restaurantList
-//                .stream()
-//                .filter(restaurant -> restaurant.getID().equals(restaurantId))
-//                .forEach(restaurant -> chosenRestaurant.set(restaurant));
-
+        final var restaurantUUID = UUID.fromString(restaurantId);
         final var foundRestaurant = restaurantRepository.restaurantList
                 .stream()
-                .filter(restaurant -> restaurant.getId().equals(restaurantId))
+                .filter(restaurant -> restaurant.getId().compareTo(restaurantUUID) == 0)
                 .findAny()
                 .orElseThrow(NotFoundRestaurantException::new);
-
         restaurantRepository.restaurantList.remove(foundRestaurant);
         System.out.println("Restaurant removed");
-
-//            for (int i = 0; i < restaurantRepository.restaurantList.size(); i++) {
-//                if (restaurantId.equals(restaurantRepository.restaurantList.get(i).getID()))
-//                    restaurantRepository.restaurantList.remove(i);
-//                System.out.println("restaurant removed");
-//
 
     }
 
